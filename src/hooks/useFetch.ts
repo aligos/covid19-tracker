@@ -1,58 +1,28 @@
-import {ref, computed, reactive} from 'vue'
-import axios, {AxiosRequestConfig, AxiosResponse} from 'axios'
+import {ref} from 'vue'
+import axios, {AxiosRequestConfig} from 'axios'
 
 interface Config extends AxiosRequestConfig {
-  skip?: boolean
+  delay?: number
 }
 
-export const useFetch = (url: string, config?: Config) => {
-  const data = ref(null)
-  const response = ref<AxiosResponse | null>(null)
-  const error = ref<unknown | null>(null)
-  const loading = ref(false)
-
-  const fetch = async () => {
-    loading.value = true
-    try {
-      const result = await axios.request({
-        url,
-        ...config,
-      })
-      response.value = result
-      data.value = result.data
-    } catch (ex) {
-      error.value = ex
-    } finally {
-      loading.value = false
-    }
+export default async function useFetch(url: string, config: Config) {
+  const fetch = () => {
+    return new Promise((resolve) => {
+      setTimeout(async () => {
+        resolve(
+          await (
+            await axios.request({
+              url,
+              ...config,
+            })
+          ).data,
+        )
+      }, config.delay ?? 0)
+    })
   }
 
-  !config?.skip && fetch()
+  const response = ref()
+  response.value = await fetch()
 
-  return {response, error, data, loading, fetch}
-}
-
-const cacheMap = reactive(new Map())
-
-export const useFetchCache = (key: string, url: string, config: Config) => {
-  const info = useFetch(url, {...config, skip: true})
-
-  const update = () => cacheMap.set(key, info.response.value)
-  const clear = () => cacheMap.set(key, undefined)
-
-  const fetch = async () => {
-    try {
-      await info.fetch()
-      update()
-    } catch {
-      clear()
-    }
-  }
-
-  const response = computed(() => cacheMap.get(key))
-  const data = computed(() => response.value?.data)
-
-  if (response.value == null) fetch()
-
-  return {...info, data, response, fetch, clear}
+  return response
 }
