@@ -5,12 +5,9 @@
     </div>
     <p>
       API by
-      <a
-        href="https://github.com/Reynadi531/api-covid19-indonesia-v2"
-        class="color-blue-300"
+      <a class="text-blue-300" href="https://covid19api.com" target="_blank">
+        covid19api.com</a
       >
-        Reynadi531
-      </a>
     </p>
   </header>
 </template>
