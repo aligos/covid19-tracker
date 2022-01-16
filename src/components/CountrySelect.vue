@@ -4,7 +4,7 @@
     class="form-select mt-10 block w-full border p-3 rounded"
     @change="onChange()"
   >
-    <option value="0">Select Country</option>
+    <option value="">Select Country</option>
     <option
       v-for="country in props.countries"
       :key="country.ID"
@@ -19,14 +19,14 @@
 import {ref} from 'vue'
 
 interface Props {
-  countries: object[]
+  countries: Country[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
   countries: () => [],
 })
 const emit = defineEmits(['get-country'])
-const selected = ref(0)
+const selected = ref('')
 
 function onChange() {
   const country = props.countries.find((item) => item.ID === selected.value)

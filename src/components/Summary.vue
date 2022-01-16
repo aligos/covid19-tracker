@@ -1,10 +1,13 @@
 <template>
   <div class="flex-1 overflow-y-auto">
     <div class="container p-2 md:p-4">
-      <TimeStamp :data-date="summary.Date" :title="title" />
-      <DataBoxes :status="status ?? summary.Global" />
+      <TimeStamp
+        :data-date="data?.Date"
+        :title="selectedCountry?.Country ?? 'Global'"
+      />
+      <DataBoxes :status="selectedCountry ?? data?.Global" />
       <CountrySelect
-        :countries="summary.Countries"
+        :countries="data?.Countries"
         @get-country="getCountryData"
       />
     </div>
@@ -12,22 +15,24 @@
 </template>
 <script lang="ts" setup>
 import {ref} from 'vue'
+import {useQuery} from 'vue-query'
+
 import TimeStamp from './TimeStamp.vue'
 import DataBoxes from './DataBoxes.vue'
 import CountrySelect from './CountrySelect.vue'
-import useFetch from '../hooks/useFetch'
 
-const title = ref('Global')
-const status = ref({})
+const selectedCountry = ref<Country | null>(null)
 
-const summary = await useFetch('https://api.covid19api.com/summary', {
-  delay: 2000,
-})
+const getSummary = async (): Promise<Summary> =>
+  await fetch('https://api.covid19api.com/summary').then((response) =>
+    response.json(),
+  )
 
-status.value = summary.Global
+const {data, suspense} = useQuery('summary', getSummary)
 
-const getCountryData = (country) => {
-  status.value = country ?? summary.Global
-  title.value = country?.Country ?? 'Global'
+await suspense()
+
+const getCountryData = (country: Country) => {
+  selectedCountry.value = country
 }
 </script>
