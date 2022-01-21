@@ -17,19 +17,22 @@
 
 <script lang="ts" setup>
 import {ref} from 'vue'
+import * as R from 'ramda'
 
 interface Props {
   countries: Country[]
 }
 
+const selected = ref('')
+
 const props = withDefaults(defineProps<Props>(), {
   countries: () => [],
 })
+
 const emit = defineEmits(['get-country'])
-const selected = ref('')
 
 function onChange() {
-  const country = props.countries.find((item) => item.ID === selected.value)
+  const country = R.find(R.propEq('ID', selected.value), props.countries)
   emit('get-country', country)
 }
 </script>
